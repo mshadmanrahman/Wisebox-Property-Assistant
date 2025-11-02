@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { SendIcon, PaperclipIcon, CloseIcon } from './Icons';
 
@@ -12,6 +11,21 @@ const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) => {
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!isLoading) {
+      textareaRef.current?.focus();
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset height to recalculate
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [message]);
 
   useEffect(() => {
     if (!file) {
@@ -28,13 +42,6 @@ const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) => {
     } else {
         setFilePreview('file'); // non-image preview flag
     }
-
-    // Cleanup function
-    return () => {
-      if (filePreview && filePreview.startsWith('blob:')) {
-        URL.revokeObjectURL(filePreview);
-      }
-    };
   }, [file]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,12 +57,23 @@ const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitForm = () => {
     if ((message.trim() || file) && !isLoading) {
       onSendMessage(message, file);
       setMessage('');
       handleRemoveFile();
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    submitForm();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitForm();
     }
   };
 
@@ -81,7 +99,7 @@ const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) => {
             </button>
         </div>
       )}
-      <form onSubmit={handleSubmit} className="flex items-center space-x-3">
+      <form onSubmit={handleSubmit} className="flex items-end space-x-3">
         <input
             type="file"
             ref={fileInputRef}
@@ -98,13 +116,16 @@ const InputBar: React.FC<InputBarProps> = ({ onSendMessage, isLoading }) => {
         >
           <PaperclipIcon className="w-6 h-6" />
         </button>
-        <input
-          type="text"
+        <textarea
+          ref={textareaRef}
+          rows={1}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
           disabled={isLoading}
-          className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-700 disabled:opacity-50"
+          className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100 dark:bg-gray-700 disabled:opacity-50 resize-none overflow-y-auto"
+          style={{maxHeight: '120px'}}
         />
         <button
           type="submit"

@@ -10,6 +10,29 @@ interface MessageProps {
 const Message: React.FC<MessageProps> = ({ message }) => {
   const isUser = message.role === 'user';
 
+  const renderTextWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, i) => {
+        if (part.match(urlRegex)) {
+            return (
+                <a
+                    key={i}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={isUser ? "text-blue-200 hover:underline" : "text-blue-500 hover:underline"}
+                >
+                    {part}
+                </a>
+            );
+        }
+        return part;
+    });
+};
+
+
   if (message.isLoading) {
     return (
       <div className="flex items-start space-x-3 my-4">
@@ -53,7 +76,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                 )}
             </div>
         )}
-        {message.naturalReply && <p className="text-sm whitespace-pre-wrap">{message.naturalReply}</p>}
+        {message.naturalReply && <p className="text-sm whitespace-pre-wrap">{renderTextWithLinks(message.naturalReply)}</p>}
       </div>
       {isUser && (
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">

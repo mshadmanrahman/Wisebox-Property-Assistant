@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import StatusBar from './components/StatusBar';
 import ChatWindow from './components/ChatWindow';
 import InputBar from './components/InputBar';
-import ProfileDisplay from './components/ProfileDisplay';
-import ActionsDisplay from './components/ActionsDisplay';
 import SourcesDisplay from './components/SourcesDisplay';
 import { sendMessageToGemini, parseGeminiResponse } from './services/geminiService';
 import { DisplayMessage, DocStatus, Source } from './types';
@@ -152,11 +150,6 @@ const App: React.FC = () => {
       </header>
       <main className="flex-1 flex flex-col md:flex-row gap-4 p-4 overflow-hidden">
         
-        {/* Left Panel */}
-        <div className="w-full md:w-1/4 order-2 md:order-1 flex flex-col gap-4 overflow-y-auto">
-            <ProfileDisplay profile={profile} />
-        </div>
-        
         {/* Center Panel */}
         <div className="w-full md:flex-1 order-1 md:order-2 flex flex-col min-h-0 shadow-lg rounded-lg">
             <StatusBar status={status} />
@@ -166,7 +159,6 @@ const App: React.FC = () => {
         
         {/* Right Panel */}
         <div className="w-full md:w-1/4 order-3 md:order-3 flex flex-col gap-4 overflow-y-auto">
-            <ActionsDisplay actions={actions} />
             <SourcesDisplay sources={sources} />
         </div>
       </main>
